@@ -89,14 +89,14 @@
 <meta property="og:site_name" content="Kai&#39;s Blog">
 <meta property="og:description" content="Mach-O在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。 Mach-O的架构：">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/Users/wangkai01/Desktop/Pages/Work%20with%20compiler------premain启动优化/mach-o.png">
-<meta property="og:image" content="http://yoursite.com/Users/wangkai01/Desktop/Pages/Work%20with%20compiler------premain启动优化/section_text.png">
-<meta property="og:image" content="http://yoursite.com/Users/wangkai01/Desktop/Pages/Work%20with%20compiler------premain启动优化/section_data.png">
-<meta property="og:updated_time" content="2019-03-10T05:45:44.701Z">
+<meta property="og:image" content="http://yoursite.com/2019/03/10/Work-with-compiler-premain启动优化/mach-o.png">
+<meta property="og:image" content="http://yoursite.com/2019/03/10/Work-with-compiler-premain启动优化/section_text.png">
+<meta property="og:image" content="http://yoursite.com/2019/03/10/Work-with-compiler-premain启动优化/section_data.png">
+<meta property="og:updated_time" content="2019-07-15T09:37:18.461Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Work with compiler------premain启动优化">
 <meta name="twitter:description" content="Mach-O在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。 Mach-O的架构：">
-<meta name="twitter:image" content="http://yoursite.com/Users/wangkai01/Desktop/Pages/Work%20with%20compiler------premain启动优化/mach-o.png">
+<meta name="twitter:image" content="http://yoursite.com/2019/03/10/Work-with-compiler-premain启动优化/mach-o.png">
 
 
 
@@ -338,7 +338,7 @@
       
         <h3 id="Mach-O"><a href="#Mach-O" class="headerlink" title="Mach-O"></a>Mach-O</h3><p>在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。</p>
 <p>Mach-O的架构：</p>
-<p><img src="/Users/wangkai01/Desktop/Pages/Work with compiler------premain启动优化/mach-o.png" alt=""></p>
+<p><img src="/2019/03/10/Work-with-compiler-premain启动优化/mach-o.png" alt=""></p>
 <a id="more"></a>
 <h4 id="Segment"><a href="#Segment" class="headerlink" title="Segment"></a>Segment</h4><p>执行一个可执行文件时。虚拟内存系统会将Segment映射到进程的地址空间。在虚拟内存系统进行映射时，不同的Segment会以不同的参数（权限）被映射。常见的Segment有：</p>
 <ul>
@@ -348,8 +348,8 @@
 <li>__LINKEDIT:　链接器使用的符号以及其他表。</li>
 </ul>
 <h4 id="Section"><a href="#Section" class="headerlink" title="Section"></a>Section</h4><p>Section 是具体有用的数据存放的地方，下表列出了<strong>DATA 和 </strong>TEXT下的Section：</p>
-<p><img src="/Users/wangkai01/Desktop/Pages/Work with compiler------premain启动优化/section_text.png" alt=""></p>
-<p><img src="/Users/wangkai01/Desktop/Pages/Work with compiler------premain启动优化/section_data.png" alt=""></p>
+<p><img src="/2019/03/10/Work-with-compiler-premain启动优化/section_text.png" alt=""></p>
+<p><img src="/2019/03/10/Work-with-compiler-premain启动优化/section_data.png" alt=""></p>
 <h3 id="attribute"><a href="#attribute" class="headerlink" title="__attribute__"></a>__attribute__</h3><p>__attribute__是一种编译器指令，可以让编译器做更多地错误检查和代码优化，其中就包括大家常见的废弃掉方法、类或者变量的指令__attribute__ ((deprecated(“”)))。</p>
 <p>__attribute__的一般语法形式是__attribute__关键字后面跟两个小括号，在小括号里是逗号分隔的选项。这里我们重点关注<a href="https://clang.llvm.org/docs/AttributeReference.html#section-gnu-section-declspec-allocate" target="_blank" rel="noopener">section() 函数</a>。</p>
 <h4 id="section-函数"><a href="#section-函数" class="headerlink" title="section() 函数"></a>section() 函数</h4><p>前面提到__DATA段为可读写程序数据段，而section() 函数提供了二进制段的读写能力，它可以将一些编译期就可以确定的常量写入数据段。在阅读runtime源码的过程中，可以发现苹果大量利用__attribute__和section()函数在编译器将数据写入__DATA段。</p>
