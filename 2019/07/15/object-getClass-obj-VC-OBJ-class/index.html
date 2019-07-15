@@ -91,7 +91,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2019/07/15/object-getClass-obj-VC-OBJ-class/OC类结构关系图解.png">
 <meta property="og:image" content="http://yoursite.com/2019/07/15/object-getClass-obj-VC-OBJ-class/类结构关系调用图.jpeg">
-<meta property="og:updated_time" content="2019-07-15T10:38:54.354Z">
+<meta property="og:updated_time" content="2019-07-15T10:45:21.715Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="object_getClass(obj) VC [OBJ class]">
 <meta name="twitter:description" content="阅读RAC源码时，卡在了 RACSwizzleClass 方法。在 RACSwizzleClass 方法的实现中对self.class 和  object_getClass(self)的返回值进行了比较。what？object_getClass的返回值和class方法的返回值会不一致？感觉非常奇怪，由此进行了一番探索。为了方便理解，这里会先讲一下OC类、元类相关的基础概念。 什么是对象？  作为面">
@@ -361,6 +361,7 @@
 <h3 id="什么是对象？"><a href="#什么是对象？" class="headerlink" title="什么是对象？"></a>什么是对象？</h3><p>  作为面向对象的核心概念–每一个对象都有一个类。在OC中有isa指针（指向其所属类）的结构体都可以视为一个对象（所以block也是一个对象）。</p>
 <p>  事实上，OC中id的定义也是这样的</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/// Represents an instance of a class.</span><br><span class="line">struct objc_object &#123;</span><br><span class="line">    Class isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">/// A pointer to an instance of a class.</span><br><span class="line">typedef struct objc_object *id</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
 <h4 id="OC的消息机制"><a href="#OC的消息机制" class="headerlink" title="OC的消息机制"></a>OC的消息机制</h4><p>  消息机制是OC的核心机制，OC中类保存了对象的方法列表、变量列表、super_class等信息，OC中向对象发送一条消息，runtime会根据对象isa指针在类中存储的方法列表及继承体系中寻找并调用相应方法。</p>
 <h3 id="类也是一个对象"><a href="#类也是一个对象" class="headerlink" title="类也是一个对象"></a>类也是一个对象</h3><p>大家应该都了解，OC中类也是一个对象。例如，我们可以给类发送一条消息</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[NSString stringFromNumber:@3]</span><br></pre></td></tr></table></figure>
