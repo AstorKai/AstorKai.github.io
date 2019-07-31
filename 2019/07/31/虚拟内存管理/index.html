@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="内存,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Kai's Blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="虚拟内存简述 虚拟内存是计算机系统内存管理的一种技术。它使得应用程序认为它拥有连续可用的内存（一个连续完整的地址空间），而实际上，它通常是被分割成多个物理内存碎片，还有部分被暂时存储在外部磁盘存储器上。 如图：">
+<meta name="keywords" content="内存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟内存管理">
+<meta property="og:url" content="http://yoursite.com/2019/07/31/虚拟内存管理/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="虚拟内存简述 虚拟内存是计算机系统内存管理的一种技术。它使得应用程序认为它拥有连续可用的内存（一个连续完整的地址空间），而实际上，它通常是被分割成多个物理内存碎片，还有部分被暂时存储在外部磁盘存储器上。 如图：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/07/31/虚拟内存管理/VirtualMem01.png">
+<meta property="og:image" content="http://yoursite.com/2019/07/31/虚拟内存管理/656644-88af406f0dcc3d44.png">
+<meta property="og:image" content="http://yoursite.com/2019/07/31/虚拟内存管理/656644-23f0b90ff47ff865.png">
+<meta property="og:image" content="http://yoursite.com/2019/07/31/虚拟内存管理/virtuualMemoory.png">
+<meta property="og:updated_time" content="2019-07-31T09:51:08.051Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="虚拟内存管理">
+<meta name="twitter:description" content="虚拟内存简述 虚拟内存是计算机系统内存管理的一种技术。它使得应用程序认为它拥有连续可用的内存（一个连续完整的地址空间），而实际上，它通常是被分割成多个物理内存碎片，还有部分被暂时存储在外部磁盘存储器上。 如图：">
+<meta name="twitter:image" content="http://yoursite.com/2019/07/31/虚拟内存管理/VirtualMem01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/31/虚拟内存管理/">
+
+
+
+
+
+  <title>虚拟内存管理 | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Kai's Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/31/虚拟内存管理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="AstorKai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">虚拟内存管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-31T13:52:31+08:00">
+                2019-07-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="虚拟内存简述"><a href="#虚拟内存简述" class="headerlink" title="虚拟内存简述"></a>虚拟内存简述</h2><p> 虚拟内存是计算机系统内存管理的一种技术。它使得应用程序认为它拥有连续可用的内存（一个连续完整的地址空间），而实际上，它通常是被分割成多个物理内存碎片，还有部分被暂时存储在外部磁盘存储器上。</p>
+<p>如图： </p>
+<p><img src="/2019/07/31/虚拟内存管理/VirtualMem01.png" alt=""></p>
+<a id="more"></a>
+<p>与没有使用虚拟内存技术的系统相比，虚拟内存的优势主要体现在以下几点：</p>
+<ul>
+<li>它将主存看成是一个存储在磁盘空间上的地址空间的高速缓存，主存中只保存活动区域，并根据需要在磁盘和主存之间来回传送数据。</li>
+<li>它为所有进程提供了一致的地址空间,简化了内存管理。</li>
+<li>它保护了每个进程的地址空间不被其他进程破坏。</li>
+</ul>
+<p>使用这种技术的系统使得大型程序的编写变得更容易，对真正的物理内存（例如RAM）的使用也更有效率。OS X 和 iOS都提供了虚拟内存管理系统。本文中我们将深入探讨iOS OS X 下的虚拟内存管理系统。</p>
+<h2 id="虚拟内存寻址操作"><a href="#虚拟内存寻址操作" class="headerlink" title="虚拟内存寻址操作"></a>虚拟内存寻址操作</h2><p>我们先来看一下物理内存的寻址操作：</p>
+<h3 id="物理地址寻址操作"><a href="#物理地址寻址操作" class="headerlink" title="物理地址寻址操作"></a>物理地址寻址操作</h3><p>下图展示了物理寻址操作下从4字节处开始读取4个字节。</p>
+<p><img src="/2019/07/31/虚拟内存管理/656644-88af406f0dcc3d44.png" alt=""></p>
+<p>CPU 在执行这条指令的时候，生成一个有效物理地址，通过内存总线，把这个物理地址传递给主存，主存取出从物理地址4处开始的 4 个字节字，然后将它返回给 CPU，CPU 将它存放在一个寄存器里。早期使用物理寻址的系统通常都比较简单，比如数字信号处理器，计算器等嵌入式设备。</p>
+<h3 id="虚拟地址寻址操作"><a href="#虚拟地址寻址操作" class="headerlink" title="虚拟地址寻址操作"></a>虚拟地址寻址操作</h3><p>对于虚拟内存地址的寻址操作，处理器及其内存管理单元（MMU）维护了一个页表，将程序的逻辑地址空间中的页面映射到计算机RAM中的硬件地址。当程序代码访问存储器中的地址时，MMU使用页表将指定的逻辑地址转换为实际的硬件存储地址。此转换是自动改发生的，对正在运行的应用程序是透明的。<br>之后，再进行物理地址寻址操作即可。</p>
+<p><img src="/2019/07/31/虚拟内存管理/656644-23f0b90ff47ff865.png" alt=""></p>
+<h2 id="分页（Paging）"><a href="#分页（Paging）" class="headerlink" title="分页（Paging）"></a>分页（Paging）</h2><p>为了更好的利用和管理计算机内存资源，有效利用碎片内存，操作系统引入了<a href="https://www.zhihu.com/question/50796850" target="_blank" rel="noopener">内存分页</a>的概念。在分页的概念下，内存的换入换出是以页为单位了。</p>
+<p>那么为什么我们可以把运行中程序的某一页换出到磁盘？  </p>
+<p>答案是程序的空间局部性：当一个程序运行时，在某个时间段，它只是频繁的用到了一小部分数据。所以我们可以将程序暂时用不到的数据、代码换出到磁盘。  </p>
+<p>在OS X 和早期版本的iOS中，虚拟内存页面和物理内存页面大小均为4kb。基于A7和A8处理器的系统 虚拟内存分页大小为16kb，物理内存大小分页为4kb。A9及以上的处理器 虚拟内存和物理内存分页大小均为16kb。</p>
+<h2 id="虚拟内存的核心"><a href="#虚拟内存的核心" class="headerlink" title="虚拟内存的核心"></a>虚拟内存的核心</h2><p>在继续深入之前我们一起来看一张WWDC 2012上的一张PPT，熟悉一下iOS/OS X虚拟内存的核心概念。</p>
+<p><img src="/2019/07/31/虚拟内存管理/virtuualMemoory.png" alt=""></p>
+<h3 id="Region"><a href="#Region" class="headerlink" title="Region"></a>Region</h3><p>首先是Region，如果每次需要内存时都通过系统调用内核来分配几KB的内存代价是非常高昂的，所以操作系统将虚拟内存分为不同的Region，如上所示ImageIO Region、Malloc Region。这样，分配内存时只需从Region中分配即可。</p>
+<h3 id="VM-Object"><a href="#VM-Object" class="headerlink" title="VM Object"></a>VM Object</h3><p>每一个Region都会关联一个VM Object 内核通过VM Object 来管理Region中对应的虚拟内存页。Region中的虚拟内存页除可以映射到物理内存中，还可以映射到后备存储或文件系统中的内存映射文件。VM Object中包含一个pager，通过pager来管理虚拟内存页与后备存储的映射或与内存映射文件的映射。</p>
+<p>the default pager： 管理后备存储和虚拟内存页面的映射，并在需要时将这些数据加载进入内存。<br>the vnode pager：The vnode pager使用分页机制直接向文件提供窗口。这个机制允许您读取和写入文件的某些部分，就像它们位于内存中一样。</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resident pages</td>
+<td style="text-align:center">Region中当前驻留在物理内存中的内存页列表</td>
+</tr>
+<tr>
+<td>Size</td>
+<td style="text-align:center">Region的大小，以字节为单位。</td>
+</tr>
+<tr>
+<td>Pager</td>
+<td style="text-align:center">负责跟踪和处理Region中在后备存储空间（或文件）中的页面</td>
+</tr>
+<tr>
+<td>Shadow</td>
+<td style="text-align:center">用于优化copy-on-write机制</td>
+</tr>
+<tr>
+<td>Copy</td>
+<td style="text-align:center">用于优化copy-on-write机制</td>
+</tr>
+<tr>
+<td>Attributes</td>
+<td style="text-align:center">标志指示各种实现细节的状态。</td>
+</tr>
+</tbody>
+</table>
+<p>如果vm 对象涉及copy-on-write (vm_copy) 操作, shadow和copy字段可能指向其他vm对象。否则这两个字段都为null。</p>
+<h3 id="Resident-Memory"><a href="#Resident-Memory" class="headerlink" title="Resident Memory"></a>Resident Memory</h3><p>当前驻留在物理内存中的虚拟内存，与之对应的是当前未驻留在物理内存中的虚拟内存nonresident Memory。</p>
+<h2 id="虚拟内存管理"><a href="#虚拟内存管理" class="headerlink" title="虚拟内存管理"></a>虚拟内存管理</h2><p>虚拟内存管理系统的核心是对内存页的管理：虚拟内存页和物理内存页的映射、Page Fault、Paging Out、Paging In等。</p>
+<h3 id="Page-fault"><a href="#Page-fault" class="headerlink" title="Page fault"></a>Page fault</h3><p>就程序而言，其逻辑地址空间始终可用。但是，如果应用程序访问当前不再物理RAM中的内存页的地址，就会发生page fault。当page fault 触发后，虚拟内存系统会通过page-fault handler来响应。page-fault handler 停止当前程序正在执行的代码，找到空闲的物理内存页，从磁盘加载包含所需数据的页面，更新页面表，然后将控制返回到程序的代码，程序就可以正常执行。</p>
+<p>磁盘抖动都会对性能产生负面影响。因为它迫使系统花费大量的时间来读写磁盘。从后备存储中读取页面会比直接从RAM读取要慢得多。如果系统必须先将页面写入磁盘才能从磁盘中读取另一个页面，则性能影响会更大。</p>
+<h3 id="Page-Lists"><a href="#Page-Lists" class="headerlink" title="Page Lists"></a>Page Lists</h3><p>内核维护了三个系统范围内的物理内存页列表：</p>
+<ul>
+<li>active list ：维护了当前映射在内存中并且最近被访问过的页面</li>
+<li>inactive list ：维护了当前映射在内存中但是最近没有被访问过的内存页面，这些页面包含有效数据，可以随时从内存中删除。</li>
+<li>free list ： 维护了当前空闲的物理内存页。这些页面可以供任何需要它们的进程使用。</li>
+</ul>
+<p>当空闲列表上的页数低于阈值时，pager会尝试平衡队列。它通过从非活动列表中提取页面来完成此操作。如果最近访问过某个页面，则会重新激活该页面并将其放置在活动列表的末尾。在OS X中，<br>如果inactive list中的内存页存储的数据并没有被写入后备存储内存中，在释放该内存页将其置入free list之前必须将该内存页存储的数据page out到后备存储内存中。（在iOS中对于非活跃内存的清理，必须由应用程序自己来操作）</p>
+<p>当应用程序不再访问某一内存页，内核将该内存页从active list移动至inactive list。当page fault 发生时，内存将内存页从inactive list 移动至 active list。当虚拟内存页换出内衬时，对应的物理内存页将被移至free list。同样，当进程显示的是放过内存时，内核将相关内存页移动至free list。</p>
+<h3 id="Paging-Out"><a href="#Paging-Out" class="headerlink" title="Paging Out"></a>Paging Out</h3><p>OS X下，如果在free list 的内存页低于一个指定的阈值，内核通过将非活动页面交换到磁盘来回收物理内存页面。为此：内核需遍历所有在物理内存中的活跃内存列表和非活跃内存列表：</p>
+<ol>
+<li>如果active list中的内存页最近没有被访问，该内存页将被移动至非活动内存页。</li>
+<li>如果inactive list 中的内存页最近没有被访问，内核找到页面对应的VM obj。</li>
+<li>如果该VM obj之前没有进行过page操作，内核创建为其创建一个pager obj。</li>
+<li>VM obj 的 pager 尝试将该页面写至后备内存中。</li>
+<li>如果pager第四步操作成功，内核释放该页面所对应的物理内存，将该内存页从inactive list 移至free list。</li>
+</ol>
+<p>在iOS平台下，内核不会将页面写入后备存储。当可用内存量低于计算阈值时，内存会先将clear memory 移动至磁盘，并且还可能发出memory warning。</p>
+<h3 id="Paging-In"><a href="#Paging-In" class="headerlink" title="Paging In"></a>Paging In</h3><p>当操作系统访问到没有被映射到物理内存页的虚拟内存页时会发生memory access fault。 发生内存访问错误时会触发Paging In process。</p>
+<p>有两种类型的memory access fault：</p>
+<ol>
+<li>soft fault： 当引用地址的页面驻留在物理内存中但未映射到此进程的地址空间时，会触发soft fault。</li>
+<li>hard fault： 当引用地址的页面没有驻留在物理内存中（存储介质为后备存储空间或文件），会触发hard fault。这就是通常所说的page fault。</li>
+</ol>
+<p>发生任何类型的memory access fault时，内核将为访问Region找到对应的VM obj。然后内核遍历VM obj对象的常驻页面列表。如果所需页面位于常驻页面列表中，则内核会触发soft fault，否则触发hard fault。</p>
+<p>对于 soft faults： 内核将包含页面的物理内存映射到进程的虚拟地址空间。然后内核将该页面标记为活跃。如果涉及到写操作，页面同样会被标记为已修改，后续该页面需要释放时会将其写入后备存储。</p>
+<p>对于hard faults： 根据VM object对象pager类型的不同页面映射在后备存储或磁盘文件上。pager将页面映射到物理内存上，并修改页面映射信息。和soft faults一样，如果涉及到写操作，该内存页将被标记为已修改。</p>
+<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><p><a href="">About the Virtual Memory System</a><br><a href="https://zh.wikipedia.org/wiki/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98" target="_blank" rel="noopener">虚拟内存</a><br><a href="https://www.zhihu.com/question/50796850" target="_blank" rel="noopener">内存分页</a><br><a href="https://developer.apple.com/videos/play/wwdc2012/242/" target="_blank" rel="noopener">iOS App Performance: Memory</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/内存/" rel="tag"># 内存</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/18/Optimizing-Storage-in-Your-App/" rel="next" title="Optimizing Storage in Your App">
+                <i class="fa fa-chevron-left"></i> Optimizing Storage in Your App
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">AstorKai</p>
+              <p class="site-description motion-element" itemprop="description">不忘初心，方得始终。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟内存简述"><span class="nav-number">1.</span> <span class="nav-text">虚拟内存简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟内存寻址操作"><span class="nav-number">2.</span> <span class="nav-text">虚拟内存寻址操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#物理地址寻址操作"><span class="nav-number">2.1.</span> <span class="nav-text">物理地址寻址操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟地址寻址操作"><span class="nav-number">2.2.</span> <span class="nav-text">虚拟地址寻址操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分页（Paging）"><span class="nav-number">3.</span> <span class="nav-text">分页（Paging）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟内存的核心"><span class="nav-number">4.</span> <span class="nav-text">虚拟内存的核心</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Region"><span class="nav-number">4.1.</span> <span class="nav-text">Region</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VM-Object"><span class="nav-number">4.2.</span> <span class="nav-text">VM Object</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Resident-Memory"><span class="nav-number">4.3.</span> <span class="nav-text">Resident Memory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟内存管理"><span class="nav-number">5.</span> <span class="nav-text">虚拟内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-fault"><span class="nav-number">5.1.</span> <span class="nav-text">Page fault</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Lists"><span class="nav-number">5.2.</span> <span class="nav-text">Page Lists</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Paging-Out"><span class="nav-number">5.3.</span> <span class="nav-text">Paging Out</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Paging-In"><span class="nav-number">5.4.</span> <span class="nav-text">Paging In</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">6.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">AstorKai</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
